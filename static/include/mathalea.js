@@ -452,7 +452,7 @@ return array_bis;
 
 
 /*
-* Mélange les items de deux tableaux de la même manière, sans modifier le tableau passé en argument
+* Mélange les items de deux tableaux de la même manière
 *
 * 
 * @Source https://stackoverflow.com/questions/18194745/shuffle-multiple-javascript-arrays-in-the-same-way
@@ -7389,6 +7389,7 @@ var liste_des_exercices_disponibles = {
   "3G30": Exercice_Trigo_longueurs,
   "3G31": Exercice_Trigo_angles,
   "3F1-act": fonction_notion_vocabulaire,
+  "3F10" : Image_antecedent_depuis_tableau_ou_fleche,
   "3F12": fonctions_calculs_d_images,
   "3F12-2": Image_fonction_algebrique,
   "3F12-3": Tableau_de_valeurs,
@@ -7417,8 +7418,8 @@ var liste_des_exercices_disponibles = {
   "2L11": Factoriser_Identites_remarquables2,
   "1N10": Terme_d_une_suite_definie_explicitement,
   "1N11": Terme_d_une_suite_definie_par_recurrence, 
-  "beta1E10" : Calcul_discriminant,
-  "beta1E11" : Resoudre_equation_degre_2,
+  "1E10" : Calcul_discriminant,
+  "1E11" : Resoudre_equation_degre_2,
   "PEA11": Passer_d_une_base_a_l_autre,
   "PEA11-1": Passer_de_la_base_12_ou_16_a_la_10,
   "betaTESTseb": Tests_du_Seb,
@@ -13301,6 +13302,7 @@ function Exercice_conversions_de_longueurs(niveau = 1) {
     ];
     let unite = "m";
     let liste_unite = ["mm", "cm", "dm", "m", "dam", "hm", "km"];
+    let liste_unite1 = combinaison_listes([0,1,2,3,4,5,6],this.nb_questions)
     let liste_de_k = combinaison_listes([0, 1, 2], this.nb_questions);
     for (
       let i = 0,
@@ -13315,6 +13317,7 @@ function Exercice_conversions_de_longueurs(niveau = 1) {
       i < this.nb_questions && cpt < 50;
 
     ) {
+      let type_de_questions
       // On limite le nombre d'essais pour chercher des valeurs nouvelles
       if (this.sup < 5) {
         type_de_questions = this.sup;
@@ -13401,12 +13404,12 @@ function Exercice_conversions_de_longueurs(niveau = 1) {
           "$";
       } else {
         // pour type de question = 4
-        let unite1 = randint(0, 3);
-        let ecart = randint(1, 2); // nombre de multiplication par 10 pour passer de l'un à l'autre
-        if (ecart > 4 - unite1) {
-          ecart = 4 - unite1;
+        let unite1 = liste_unite1[i]
+        let unite2 = randint(Math.max(0,unite1-3),Math.min(unite1+3,6),unite1)
+        if (unite1>unite2){
+          [unite1,unite2]=[unite2,unite1]
         }
-        let unite2 = unite1 + ecart;
+        let ecart = unite2-unite1; // nombre de multiplication par 10 pour passer de l'un à l'autre
         if (randint(0, 1) > 0) {
           resultat = Algebrite.eval(a * Math.pow(10, ecart));
           texte =
@@ -48447,6 +48450,87 @@ function TrianglesSemblables() {
 		}
 	}
 }
+
+/**
+ * Un nombre à 2 chiffres (non multiple de 10) + 9
+ * @Auteur Rémi Angot
+ * Référence 3F10
+*/
+function Image_antecedent_depuis_tableau_ou_fleche() {
+  Exercice.call(this); // Héritage de la classe Exercice()
+  this.titre = "Lectures d'images et d'antécédents depuis un tableau de valeurs";
+  this.consigne = "";
+  this.nb_questions_modifiable = false;
+  this.nb_cols = 1;
+  this.nb_cols_corr = 1;
+  this.nb_questions = 4;
+
+  this.nouvelle_version = function (numero_de_l_exercice) {
+    this.liste_questions = []; // Liste de questions
+    this.liste_corrections = []; // Liste de questions corrigées
+	let a = randint(-20,20);
+	let b = randint(-20,20,[a]);
+	let c = randint(-20,20,[a,b]);
+	let d = randint(-20,20,[a,b,c]);
+	let e = randint(-20,20,[a,b,c,d]);
+	let f = randint(-20,20,[a,b,c,d,e]);
+	// a->b ; c->d ; e->d ; d->a ; f->c
+	let ligneX = [a,c,e,d,f]
+	let ligneY = [b,d,d,a,c]
+	shuffle2tableaux(ligneX,ligneY) // mélange les 2 lignes de la même manière
+	this.introduction = "Voici un tableau de valeurs d'une fonction $f$ : "
+	this.introduction += '<br><br>'
+	this.introduction += `$\\def\\arraystretch{1.5}\\begin{array}{|l|c|c|c|c|c|}
+	\\hline
+	x & ${ligneX[0]} & ${ligneX[1]} & ${ligneX[2]} & ${ligneX[3]} & ${ligneX[4]} \\\\
+	\\hline
+	f(x) & ${ligneY[0]} & ${ligneY[1]} & ${ligneY[2]} & ${ligneY[3]} & ${ligneY[4]} \\\\
+	\\hline
+	\\end{array}
+	$
+	`
+	let texte = `Quelle est l'image de $${a}$ par la fonction $f$ ?`
+	let texte_corr = `L'image de $${a}$ par la fonction $f$ est $${b}$, on note $f(${a})=${b}$.`
+	this.liste_questions.push(texte)
+	this.liste_corrections.push(texte_corr)
+
+	texte = `Quelle est l'image de $${c}$ par la fonction $f$ ?`
+	texte_corr = `L'image de $${c}$ par la fonction $f$ est $${d}$, on note $f(${c})=${d}$.`
+	this.liste_questions.push(texte)
+	this.liste_corrections.push(texte_corr)
+
+	let texte3 = `Quels sont les antécédents de $${a}$ par la fonction $f$ ?`
+	let texte_corr3 = `$${a}$ a un seul antécédent par la fonction $f$ qui est $${d}$, on note $f(${d})=${a}$.`
+	
+	let texte4 = `Quels sont les antécédents de $${d}$ par la fonction $f$ ?`
+	let texte_corr4 = `$${d}$ a deux antécédents par la fonction $f$ qui sont $${c}$ et $${e}$, on note $f(${c})=f(${e})=${d}$.`
+	
+	if (choice([true,false])) { // Une fois sur 2 on inverse les questions 3 et 4
+		this.liste_questions.push(texte3)
+		this.liste_corrections.push(texte_corr3)	
+		this.liste_questions.push(texte4)
+		this.liste_corrections.push(texte_corr4)	
+	} else {
+		this.liste_questions.push(texte4)
+		this.liste_corrections.push(texte_corr4)	
+		this.liste_questions.push(texte3)
+		this.liste_corrections.push(texte_corr3)
+	}
+
+	texte = `Recopier et compléter : $f(${c})=\\ldots$`
+	texte_corr = `$f(${c})=${d}$`
+	this.liste_questions.push(texte)
+	this.liste_corrections.push(texte_corr)
+
+	texte = `Recopier et compléter : $f(\\ldots)=${c}$`
+	texte_corr = `$f(${f})=${c}$`
+	this.liste_questions.push(texte)
+	this.liste_corrections.push(texte_corr)
+	
+	liste_de_question_to_contenu(this);
+  };
+  //this.besoin_formulaire_numerique = ['Niveau de difficulté',3];
+}
 /**
  * @Auteur Stéphane Guyon
  */
@@ -50453,6 +50537,8 @@ Exercice.call(this); // Héritage de la classe Exercice()
     this.nb_cols = 2;
     this.nb_cols_corr = 2;
     this.sup = 1 ; // 
+    this.correction_detaille_disponible = true;
+    sortie_html ? this.correction_detaillee = true : this.correction_detaillee = false;
 
     this.nouvelle_version = function(numero_de_l_exercice){
     this.liste_questions = []; // Liste de questions
@@ -50488,13 +50574,37 @@ Exercice.call(this); // Héritage de la classe Exercice()
                     Il existe donc deux solutions à cette équation :<br>
                     $x_1=${c} ${ecriture_algebrique(b)}$ et $x_2=${c} -${ecriture_parenthese_si_negatif(b)}$<br>
                     $S=\\{${c-b};${c+b}\\}$`;
-                            
-                  
-
-                        
+                    if (this.correction_detaillee) {
+                        let s = segment(point(0,0),point(12,0));
+                        s.styleExtremites='->';
+                        let x0 = point(3,0)
+                        x0.nom = c-b
+                        x0.positionLabel = 'below'
+                        let A = point(6,0,c)
+                        A.nom = c
+                        A.positionLabel = 'below'
+                        let x1 = point(9,0,c+b,'below')
+                        x1.nom = c+b
+                        x1.positionLabel = 'below'
+                        let s1 = segmentAvecExtremites(x0,x1)
+                        s1.color = 'blue'
+                        s1.epaisseur = 2
+                        let s2 = segmentAvecExtremites(x0,A)
+                        let l = labelPoint(A,x0,x1)
+                        let cote = segment(point(3,1),point(5.95,1))
+                        cote.styleExtremites = '<->'
+                        let texteCote = texteParPosition(b,4.5,1.6)
+                        let cote2 = segment(point(6.05,1),point(9,1))
+                        cote2.styleExtremites = '<->'
+                        let texteCote2 = texteParPosition(b,7.5,1.6)
+                        texte_corr += mathalea2d({xmin:-1,xmax:13,ymin:-2,ymax:2.5},
+                            s,s1,s2,l,cote,texteCote,cote2,texteCote2)
+                    }
                     break ;
         
-            }       
+            }
+            
+
             if (this.liste_questions.indexOf(texte)==-1){ // Si la question n'a jamais été posée, on en créé une autre
                 this.liste_questions.push(texte);
                 this.liste_corrections.push(texte_corr);
@@ -52008,29 +52118,125 @@ function Resoudre_equation_degre_2() {
   Exercice.call(this); // Héritage de la classe Exercice()
   this.titre = "Résoudre une équation du second degré";
   this.consigne = "Résoudre dans $\\mathbb{R}$ les équations suivantes.";
-  this.nb_questions = 4;
+  this.nb_questions = 6;
   this.nb_cols = 2;
   this.nb_cols_corr = 2;
-  this.spacing_corr = 3
+  this.spacing_corr = 3;
+  this.sup = 1;
 
   this.nouvelle_version = function (numero_de_l_exercice) {
     this.liste_questions = []; // Liste de questions
     this.liste_corrections = []; // Liste de questions corrigées
-    for (let i = 0, texte, texte_corr, a, b, c, delta, x1, x2, y1, y2, cpt = 0;i < this.nb_questions && cpt < 50;) {
-      // k(x-x1)(x-x2)
-      x1 = randint(-5,2,[0]);
-      x2 = randint(x1+1,5,[0,-x1]);
-      k = randint(-4,4,[0]);
-      a = k;
-      b = -k * x1 -k * x2;
-      c = k * x1 * x2
-      texte = `$${rien_si_1(a)}x^2${ecriture_algebrique_sauf1(b)}x${ecriture_algebrique(c)}=0$`
-      
-      texte_corr = `$\\Delta = ${ecriture_parenthese_si_negatif(b)}^2-4\\times${ecriture_parenthese_si_negatif(a)}\\times${ecriture_parenthese_si_negatif(c)}=${b*b-4*a*c}$`
-      texte_corr += `<br>$\\Delta>0$ donc l'équation admet deux solutions : $x_1 = \\dfrac{-b-\\sqrt{\\Delta}}{2a}$ et $x_2 = \\dfrac{-b+\\sqrt{\\Delta}}{2a}$`
-      texte_corr += `<br>$x_1 =\\dfrac{${-b}-\\sqrt{${b*b-4*a*c}}}{${2*a}}=${x1}$`
-      texte_corr += `<br>$x_2 =\\dfrac{${-b}+\\sqrt{${b*b-4*a*c}}}{${2*a}}=${x2}$`
-      texte_corr += `<br>L'ensemble des solutions de cette équation est : $\\mathcal{S}=\\{${x1} ; ${x2}\\}$.`  
+    let liste_type_de_questions = combinaison_listes(['solutionsEntieres','factorisationParx','pasDeSolution','ax2+c','solutionsReelles','solutionDouble'],this.nb_questions)
+    for (let i = 0, texte, texte_corr, a, b, c, delta, x1, x2, y1, y2, k, cpt = 0;i < this.nb_questions && cpt < 50;) {
+      if (liste_type_de_questions[i]=="solutionsEntieres"){
+        // k(x-x1)(x-x2)
+        x1 = randint(-5,2,[0]);
+        x2 = randint(x1+1,5,[0,-x1]);
+        k = randint(-4,4,[0]);
+        a = k;
+        b = -k * x1 -k * x2;
+        c = k * x1 * x2
+        texte = `$${rien_si_1(a)}x^2${ecriture_algebrique_sauf1(b)}x${ecriture_algebrique(c)}=0$`
+        
+        texte_corr = `$\\Delta = ${ecriture_parenthese_si_negatif(b)}^2-4\\times${ecriture_parenthese_si_negatif(a)}\\times${ecriture_parenthese_si_negatif(c)}=${b*b-4*a*c}$`
+        texte_corr += `<br>$\\Delta>0$ donc l'équation admet deux solutions : $x_1 = \\dfrac{-b-\\sqrt{\\Delta}}{2a}$ et $x_2 = \\dfrac{-b+\\sqrt{\\Delta}}{2a}$`
+        texte_corr += `<br>$x_1 =\\dfrac{${-b}-\\sqrt{${b*b-4*a*c}}}{${2*a}}=${x1}$`
+        texte_corr += `<br>$x_2 =\\dfrac{${-b}+\\sqrt{${b*b-4*a*c}}}{${2*a}}=${x2}$`
+        texte_corr += `<br>L'ensemble des solutions de cette équation est : $\\mathcal{S}=\\left\\{${x1} ; ${x2}\\right\\}$.`  
+      }
+      if (liste_type_de_questions[i]=="solutionDouble"){
+        // (dx+e)^2=d^2x^2+2dex+e^2
+        let d = randint(-11,11,[-1,1,0])
+        let e = randint(-11,11,[0,-1,1])
+        a = d*d;
+        b = 2*d*e;
+        c = e*e
+        texte = `$${rien_si_1(a)}x^2${ecriture_algebrique_sauf1(b)}x${ecriture_algebrique(c)}=0$`
+        
+        texte_corr = `Il est possible de factoriser le membre de gauche : $(${d}x${ecriture_algebrique(e)})^2=0$. `
+        texte_corr += `On a alors une solution double : $${tex_fraction_signe(-e,d)}`
+        if (e%d==0){
+          texte_corr += `=${-e/d}$.`
+        } else {
+          texte_corr +='$.'
+        }
+        texte_corr += `<br> Si on ne voit pas cette factorisation, on peut utiliser le discriminant.`
+        texte_corr += `<br>$\\Delta = ${ecriture_parenthese_si_negatif(b)}^2-4\\times${ecriture_parenthese_si_negatif(a)}\\times${ecriture_parenthese_si_negatif(c)}=${b*b-4*a*c}$`
+        texte_corr += `<br>$\\Delta=0$ donc l'équation admet une unique solution : $${tex_fraction('-b','2a')} = ${tex_fraction_reduite(-b,2*a)}$`
+        if (b%(2*a)==0){
+          texte_corr += `<br>L'ensemble des solutions de cette équation est : $\\mathcal{S}=\\left\\{${-b/(2*a)}\\right\\}$.`  
+        } else {
+          texte_corr += `<br>L'ensemble des solutions de cette équation est : $\\mathcal{S}=\\left\\{${tex_fraction_reduite(-b,2*a)}\\right\\}$.`  
+        }
+      }
+      if (liste_type_de_questions[i]=="solutionsReelles"){
+        // ax^2+bx+c
+        a = randint(-11,11,0);
+        b = randint(-11,11,0);
+        c = randint(-11,11,0);
+        while (b**2-4*a*c<0 || [1,4,9,16,25,36,49,64,81,100,121,144,169,196,225,256,289,324,361,400,441,484,529,576,625,676,729,784,841,900,961,1024,1089].includes(b**2-4*a*c)){
+          a = randint(-11,11,0);
+          b = randint(-11,11,0);
+          c = randint(-11,11,0);
+        }
+        texte = `$${rien_si_1(a)}x^2${ecriture_algebrique_sauf1(b)}x${ecriture_algebrique(c)}=0$`
+        
+        texte_corr = `$\\Delta = ${ecriture_parenthese_si_negatif(b)}^2-4\\times${ecriture_parenthese_si_negatif(a)}\\times${ecriture_parenthese_si_negatif(c)}=${b*b-4*a*c}$`
+        texte_corr += `<br>$\\Delta>0$ donc l'équation admet deux solutions : $x_1 = \\dfrac{-b-\\sqrt{\\Delta}}{2a}$ et $x_2 = \\dfrac{-b+\\sqrt{\\Delta}}{2a}$`
+        texte_corr += `<br>$x_1 =\\dfrac{${-b}-\\sqrt{${b*b-4*a*c}}}{${2*a}}\\approx ${arrondi_virgule((-b-Math.sqrt(b**2-4*a*c))/(2*a),2)}$`
+        texte_corr += `<br>$x_2 =\\dfrac{${-b}+\\sqrt{${b*b-4*a*c}}}{${2*a}}\\approx ${arrondi_virgule((-b+Math.sqrt(b**2-4*a*c))/(2*a),2)}$`
+        texte_corr += `<br>L'ensemble des solutions de cette équation est : $\\mathcal{S}=\\left\\{\\dfrac{${-b}-\\sqrt{${b*b-4*a*c}}}{${2*a}} ; \\dfrac{${-b}+\\sqrt{${b*b-4*a*c}}}{${2*a}}\\right\\}$.`  
+      }
+      if (liste_type_de_questions[i]=="factorisationParx"){
+        // x(ax+b)=ax^2+bx
+        a = randint(-11,11,[0,-1,1]);
+        b = randint(-11,11,0)
+        texte = `$${rien_si_1(a)}x^2${ecriture_algebrique_sauf1(b)}x=0$`
+        
+        texte_corr = `On peut factoriser le membre de gauche par $x$.`
+        texte_corr += `<br>$x(${rien_si_1(a)}x${ecriture_algebrique(b)})=0$`
+        texte_corr += `<br>Si un produit est nul alors l'un au moins de ses facteurs est nul.`
+        texte_corr += `<br>$x=0\\quad$ ou $\\quad${rien_si_1(a)}x${ecriture_algebrique(b)}=0$`
+        texte_corr += `<br>$x=0\\quad$ ou $\\quad x=${tex_fraction_signe(-b,a)}$`
+        texte_corr += `<br>L'ensemble des solutions de cette équation est : $\\mathcal{S}=\\left\\{0 ; ${tex_fraction_reduite(-b,a)}\\right\\}$.`  
+      }
+      if (liste_type_de_questions[i]=="ax2+c"){
+        // x(ax+b)=ax^2+bx
+        a = randint(-11,11,0);
+        c = randint(-11,11,0)
+        texte = `$${rien_si_1(a)}x^2${ecriture_algebrique(c)}=0$`
+        
+        texte_corr = `$x^2=${tex_fraction_signe(-c,a)}$`
+        if (-c/a>0){
+          texte_corr += `<br>$x=\\sqrt{${tex_fraction_reduite(-c,a)}}\\quad$ ou $\\quad x=-\\sqrt{${tex_fraction_reduite(-c,a)}}$`
+          texte_corr += `<br><br>L'ensemble des solutions de cette équation est : $\\mathcal{S}=\\left\\{\\sqrt{${tex_fraction_reduite(-c,a)}} ; -\\sqrt{${tex_fraction_reduite(-c,a)}}\\right\\}$.`  
+        } else {
+          texte_corr += `<br>Dans $\\mathbb{R}$, un carré est toujours positif donc cette équation n'a pas de solution.`
+          texte_corr += `<br>$\\mathcal{S}=\\emptyset$`
+        }
+      }
+      if (liste_type_de_questions[i]=="pasDeSolution") {
+          k = randint(1,5);
+          x1 = randint(-3,3,[0]);
+          y1 = randint(1,5);
+          if (choice(['+','-'])=='+') { // k(x-x1)^2 + y1 avec k>0 et y1>0
+            a = k;
+            b = -2 * k * x1;
+            c = k * x1 * x1 + y1;
+          } else { // -k(x-x1)^2 -y1 avec k>0 et y1>0
+            a = -k;
+            b = 2 * k * x1;
+            c = - k * x1 * x1 - y1
+          }
+          texte = `$${rien_si_1(a)}x^2${ecriture_algebrique_sauf1(b)}x${ecriture_algebrique(c)}=0$`
+          if (b == 0) {
+            texte = `$${rien_si_1(a)}x^2${ecriture_algebrique(c)}=0$`
+          }
+          texte_corr = `$\\Delta = ${ecriture_parenthese_si_negatif(b)}^2-4\\times${ecriture_parenthese_si_negatif(a)}\\times${ecriture_parenthese_si_negatif(c)}=${b*b-4*a*c}$`
+          texte_corr += `<br>$\\Delta<0$ donc l'équation n'admet pas de solution.`
+          texte_corr += `<br>$\\mathcal{S}=\\emptyset$`
+      }
 
       if (this.liste_questions.indexOf(texte) == -1) {
         // Si la question n'a jamais été posée, on en créé une autre
